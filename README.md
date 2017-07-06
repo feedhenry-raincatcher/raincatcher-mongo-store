@@ -1,7 +1,6 @@
-### raincatcher-mongoose-store
+### raincatcher-mongo-store
 
-
-One stop shop for all Mongoose schemas 
+Mongodb storage implementation
 
 ### Run tests
 

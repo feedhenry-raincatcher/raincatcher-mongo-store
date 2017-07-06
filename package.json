@@ -1,14 +1,14 @@
 {
-  "name": "fh-wfm-mongoose-store",
-  "version": "0.4.5",
-  "description": "Direct mongoose storage",
+  "name": "fh-wfm-mongo-store",
+  "version": "1.0.0",
+  "description": "Direct mongo storage",
   "main": "./lib/index.js",
   "scripts": {
     "test": "grunt test"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/feedhenry-raincatcher/raincatcher-mongoose-store.git"
+    "url": "https://github.com/feedhenry-raincatcher/raincatcher-mongo-store.git"
   },
   "keywords": [
     "wfm",
@@ -32,8 +32,7 @@
     "fh-wfm-mediator": "0.3.3",
     "lodash": "4.17.4",
     "moment": "^2.18.1",
-    "mongodb": "^2.2.29",
-    "mongoose": "4.9.1",
+    "mongodb": "^2.1.21",
     "shortid": "2.2.8"
   }
 }

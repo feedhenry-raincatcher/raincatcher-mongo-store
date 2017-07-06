@@ -2,60 +2,21 @@
 
 var config = require('./../lib/config');
 var assert = require('assert');
-var Models = require('./../models');
 var Connector = require('./../lib');
-var mongoose = require('mongoose');
-var expect = require('expect');
-var _ = require('lodash');
 
-var mongoUri = 'mongodb://localhost:27017/raincatcher-mongo-connector';
+var mongoUri = 'mongodb://localhost:27017/raincatcher-mongo2';
 
 describe(config.module, function() {
   var testDal = {};
   var testDoc = {};
 
-
-  it('should use custom schemas if passed', function(done) {
-    var customWorkorderSchema = new mongoose.Schema({
-      name: {type: String, required: true}
-    });
-    var customWorkorderModel;
-
-    var customDataSetModels = {
-      workorders: function(mongooseConnection) {
-        customWorkorderModel = mongooseConnection.model("Workorders", customWorkorderSchema);
-        return customWorkorderModel;
-      }
-    };
-
-    Connector.connect(mongoUri, {}, customDataSetModels).then(function() {
-      assert.ok(customWorkorderModel, "Expected workorder model to be defined");
-
-      Connector.getDAL('workorders').then(function(dal) {
-        assert.strictEqual(customWorkorderModel, dal.model, "Expected the custom workroder model instead of the default");
-        done();
-      });
-
-    });
-  });
-
-  it('should handle validation errors', function() {
-    return Connector.getDAL('workorders').then(function(dal) {
-
-      return dal.create({}).then(function() {
-        throw "Expected No Error";
-      }).catch(function(err) {
-        expect(err.message).toBeA('string');
-        expect(err.message).toContain("ValidationError");
-        expect(err.message).toContain("workorders");
-        expect(err.message).toContain("name");
-        expect(err.message).toContain("required");
-      });
+  before(function() {
+    Connector.connect(mongoUri, {}).then(function() {
     });
   });
 
   it('should return an instance of workorders model', function(done) {
-    Connector.getDAL('workorders', Models.workorders).then(function(_dal) {
+    Connector.getDAL('workorders').then(function(_dal) {
       _dal.init({}).then(function() {
         done();
       }, function(error) {
@@ -67,7 +28,7 @@ describe(config.module, function() {
   });
 
   it('should return an instance of workflows data access layer', function(done) {
-    Connector.getDAL('workflows', Models.workflows).then(function(_dal) {
+    Connector.getDAL('workflows').then(function(_dal) {
       _dal.init({}).then(function() {
         done();
       }, function(error) {
@@ -79,7 +40,7 @@ describe(config.module, function() {
   });
 
   it('should return an instance of result data access layer', function(done) {
-    Connector.getDAL('result', Models.result).then(function(_dal) {
+    Connector.getDAL('result').then(function(_dal) {
       testDal = _dal;
       _dal.init({}).then(function() {
         done();
@@ -92,16 +53,20 @@ describe(config.module, function() {
   });
 
   it('should add item to result collection', function(done) {
-    testDal.create({
-      id: "testid",
-      status: 'test',
-      _localuid: "localid",
-      workorderId: '1234567890'
-    }).then(function(doc) {
-      testDoc = doc;
-      done(assert.equal(testDoc.status, 'test'));
-    }, function(error) {
-      done(error);
+    Connector.getDAL('result').then(function(_dal) {
+      testDal = _dal;
+      _dal.create({
+        id: "testid",
+        status: 'test',
+        _localuid: "localid",
+        workorderId: '1234567890'
+      }).then(function(doc) {
+        testDoc = doc;
+        assert.equal(testDoc.status, 'test');
+        done();
+      }, function(error) {
+        done(error);
+      });
     });
   });
 
@@ -124,7 +89,7 @@ describe(config.module, function() {
   });
 
   it('should update with a local id', function(done) {
-    testDal.update(_.omit(testDoc, 'id')).then(function(result) {
+    testDal.update(testDoc).then(function(result) {
       testDoc = result;
       done(assert.equal(result._localuid, 'localid'));
     }, function(error) {
@@ -134,8 +99,8 @@ describe(config.module, function() {
 
   it('should return an error if no record exists', function(done) {
     var id = "idontexist";
-    testDal.read(id).then(function() {
-      done(new Error("Expected an error"));
+    testDal.read(id).then(function(data) {
+      done(new Error("Expected an error but got ", data));
     }, function(error) {
       assert.ok(error, "Expected an error");
       done();
