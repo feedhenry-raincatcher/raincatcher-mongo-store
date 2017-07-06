@@ -27,6 +27,6 @@ module.exports = function(grunt) {
       }
     }
   });
-  grunt.registerTask('test', ['eslint', 'shell:test']);
+  grunt.registerTask('test', ['shell:test']);
   grunt.registerTask('lint', ['eslint']);
 };
